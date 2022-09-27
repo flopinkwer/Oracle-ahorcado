@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+	<meta charset="utf-8">
+	<title>Ahorcado</title>
+	<link rel="stylesheet" type="text/css" href="./index.css">
+	<style type="text/css">
+		*{
+			border: 0;
+			margin: 0;
+			padding: 0;
+		}
+
+		section{
+			box-sizing: border-box;
+			display: inline-block;
+			padding: 1rem;
+			width: 100%;
+			vertical-align: top;
+			text-align: center;
+		}
+		#intentos{
+			margin-top: 1%;
+			color: red;
+			font: bold;
+		}
+
+		#dibujo{
+			box-shadow: 0px 0px 7px black;
+			width: 400px;
+			height: 300px;
+		}
+		#enviar{
+			margin-top: 10px;
+			border-radius: 5px;
+			width: 175px;
+			padding: 5px;
+			cursor: pointer;
+			background: gray;
+			color: white;
+			border: 1px solid white;
+			transition-duration: 1s;
+		}
+		#enviar:hover{
+			background: white;
+			border: 1px solid black;
+			color: black;
+		}
+
+		#letra{
+			width: 175px;
+			padding: 8px;
+			border: none;
+
+			&:focus {
+                border: none;
+            }
+
+            &:active {
+                border: none;
+            }
+		}
+
+		#palabra{
+			margin-top: 10px;
+			padding: 8px;
+			box-sizing: border-box;
+			display: inline-block;
+		}
+
+	</style>
+</head>
+<body>
+	<header>
+		<center><h1>Bienvenido al juego del ahorcado!</h1></center>
+	</header>
+	<section>
+		<canvas id="dibujo">
+			El navegador no es compatible
+		</canvas>
+		<br>
+		<div id="intentos">
+			Le quedan 6 intentos.
+		</div>
+	</section>
+	<section>
+		<input type="text" id="letra" placeholder="Escriba una letra..." maxlength="1">
+		<br>
+		<input type="button" id="enviar" value="Enviar" maxlength="1">
+		<br>
+
+		<div id="palabra"></div>
+		<br>
+		<br>
+		<h4>Palabras Usadas</h4>
+		<div id="palusadas"></div>
+	</section>
+	
+
+	<script type="text/javascript">
+		//Variables
+		const MisPalabras = ['Anticonstitucionalmente','Aminotransferasa','Litofotográficamente','Desproporcionadamente','Circunstanciadamente','Extraterritorialidad','Electrocardiográficamente','Antinorteamericanismo','Magnetoencefalografía','Esternocleidooccipitomastoideo','Lactovegetarianismo','Nacionalsindicalista','Desacostumbradamente','Craneofaringioma','Desproporcionadisimamente','Encephalitozoonidae','Esternocleidomastoideísticamente','Antitauromaquia','Seudohermafroditismo','Incomprehensibilidad','Antihipercolesterolémico','Antigubernamentalisticamente','Faringoamigdalitis','Equisatisfactibilidad','Neurorretroalimentación','Hipogammaglobulinemia','Contrarrevolucionariamente','Bioluminiscencia','Auriculoventriculostomía','Pseudohermafroditismo','Desindustrialización','Auriculoventriculostomía','Electroencefalográficamente','Magnetohidrodinámica','Antigubernamentalmente','Australopitecos','Incomprehensibilidad','Hiperesternocleidomastoideitis','Bioelectromagnetismo','Otorrinolaringologicalísimamente'];
+		const palusadas = [];
+		let paladivinar = "";
+		let palusuario = "";		
+		let intentos = 6;
+
+		document.getElementById('letra').focus();
+		//estar pendiente al dar click
+		document.getElementById("enviar").addEventListener("click", Comparacion);
+
+		document.addEventListener('keyup', function(event){
+			if(event.code == 'Enter'){
+				Comparacion();
+			}
+		});
+
+		iniciar();
+		function iniciar(){
+			//palabra aleatoria
+			paladivinar = MisPalabras[Math.floor(Math.random()*MisPalabras.length)];
+
+			//cantidad de guiones de la palabra aleatoria
+			for(let i = 0; i < paladivinar.length; i ++){
+				palusuario = palusuario+"_ ";
+			}
+
+			document.getElementById('palabra').innerHTML = palusuario;
+		}
+
+
+
+		function Comparacion(){
+			//manejo del input en minusculas
+			let letra = document.getElementById("letra").value.toLowerCase();
+			paladivinar = paladivinar.toLowerCase();
+			let nuevo = "";
+       
+
+			for(let i =0; i < paladivinar.length; i++){
+				if (letra == paladivinar[i]) {
+					nuevo = nuevo + letra + " ";
+				}else{
+					nuevo = nuevo + palusuario[i*2] + " ";
+				}
+			}
+
+			palusadas.push(letra);
+
+			if(nuevo == palusuario){
+				intentos --;
+				document.getElementById('intentos').innerHTML = 'Le  quedan '+ intentos + " intentos";
+			}
+
+			if(intentos == 0){
+				alert('Perdiste, la palabra es: '+ paladivinar);
+				location.reload(true);
+			}
+
+			if (!nuevo.includes('_ ')) {
+                alert('Has ganado!');
+                // Refrescamos la página para volver a jugar
+            	location.reload(true);
+            }
+
+        
+			palusuario = nuevo;
+			document.getElementById('palabra').innerHTML = palusuario;
+			document.getElementById('palusadas').innerHTML = palusadas;
+			document.getElementById('letra').value = "";
+			document.getElementById('letra').focus();
+			dibujo();
+		}
+
+		function dibujo(){
+			var canvas = document.getElementById('dibujo');	
+
+			if(canvas.getContext){
+				var ctx = canvas.getContext('2d');
+
+				//base del ahorcado
+				//nuevo camino
+				ctx.beginPath();
+				//donde empieza
+				ctx.moveTo(20,200);
+				ctx.lineTo(20, 10);
+				ctx.lineTo(145, 10);
+				ctx.lineTo(145, 25);
+				//dibujar
+				ctx.stroke();
+
+				if(intentos <= 5){
+					//cabeza del ahorcado
+					ctx.beginPath();
+					ctx.arc(145,40,15,0, Math.PI * 2);
+					ctx.stroke();
+				}
+				if(intentos <= 4){
+					//nuevo camino
+					ctx.beginPath();
+					//donde empieza
+					ctx.moveTo(145,55);
+					//hasta donde va
+					ctx.lineTo(145, 100);
+					//dibujar
+					ctx.stroke();
+				}
+
+				if(intentos<=3){
+					//brazo derecho
+					//nuevo camino
+					ctx.beginPath();
+					//donde empieza
+					ctx.moveTo(145,55);
+					//hasta donde va
+					ctx.lineTo(160, 80);
+					//dibujar
+					ctx.stroke();
+				}
+
+				if(intentos <= 2){
+					//brazo derecho
+					//nuevo camino
+					ctx.beginPath();
+					//donde empieza
+					ctx.moveTo(145,55);
+					//hasta donde va
+					ctx.lineTo(130, 80);
+					//dibujar
+					ctx.stroke();
+				}
+
+				if(intentos <= 1){ 
+					//pie izquierdo
+					//nuevo camino
+					ctx.beginPath();
+					//donde empieza
+					ctx.moveTo(145,100);
+					//hasta donde va
+					ctx.lineTo(120, 120);
+					//dibujar
+					ctx.stroke();
+				}
+
+				if(intentos <= 0){
+					//pie derecho
+					//nuevo camino
+					ctx.beginPath();
+					//donde empieza
+					ctx.moveTo(145,100);
+					//hasta donde va
+					ctx.lineTo(165, 120);
+					//dibujar
+					ctx.stroke();
+				}
+
+		
+			}
+		}
+
+	</script>
+</body>
+</html>
